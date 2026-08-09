@@ -1,6 +1,6 @@
 #' Walter_2015_JCR
 #'
-#' Subsetted version of a time-series-cross-sectional (TSCS) dataset  used in \href{https://journals.sagepub.com/doi/abs/10.1177/0022002714528006}{Walter (2015)}.
+#' Subsetted version of a time-series-cross-sectional (TSCS) dataset  used in Walter (2015, \doi{10.1177/0022002714528006}).
 #' It has data on duration of post-war peace as well as information on other relevant economic and political data.
 #'
 #'\describe{

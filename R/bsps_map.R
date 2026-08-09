@@ -40,6 +40,13 @@
 
 bsps_map <- function(data, mapTitle = "columnName"){
 
+    if (!requireNamespace("countrycode", quietly = TRUE) ||
+        !requireNamespace("rworldmap", quietly = TRUE)) {
+        stop("Packages 'countrycode' and 'rworldmap' are required for bsps_map(). ",
+             "Install them with: install.packages(c('countrycode', 'rworldmap'))",
+             call. = FALSE)
+    }
+
     sp <- data.frame(ccode = colnames(data),
                      ISO3 = countrycode::countrycode(colnames(data) ,'gwn','iso3c'),
                      sp = matrix(apply(data, 2, mean), ncol = 1, nrow = ncol(data)))

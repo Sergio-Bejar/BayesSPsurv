@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd src
+rm -f *.o *.so *.dll

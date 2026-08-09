@@ -1,0 +1,285 @@
+---
+title: "Introduction to BayesSPsurv"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to BayesSPsurv}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Overview
+
+**BayesSPsurv** estimates Bayesian split-population (SP) survival models. These
+models are useful when some units may never experience the event of interest
+("immune" units) and when observations may exhibit spatial dependence.
+
+The package provides three model types:
+
+- `pooledSPsurv()`: no frailties (baseline SP model).
+- `exchangeSPsurv()`: exchangeable (i.i.d.) unit-specific frailties.
+- `spatialSPsurv()`: spatially correlated frailties via a CAR prior.
+
+All models support Weibull, Exponential, and Log-Logistic duration specifications.
+
+## Data format
+
+BayesSPsurv expects a `data.frame` with the following variables:
+
+| Variable | Description |
+|----------|-------------|
+| Duration (Y) | Time from the start of the current spell to failure or censoring. This is the dependent variable in the `duration` formula. |
+| Immunity indicator (C) | Binary: 1 if the unit experienced the event ("at risk"), 0 if immune. Dependent variable in the `immune` formula. |
+| Y0 | Elapsed time since the start of the spell until the beginning of the current period (t-1). Typically 0 for the first observation. |
+| LY | Last-year indicator: 1 if this is the final observation for the unit (failure or censoring), 0 otherwise. |
+| S | (Frailty models only) Integer identifying the spatial/unit group for each observation. |
+
+The `spduration::add_duration()` function can generate these variables automatically,
+but you can also construct them manually.
+
+## Example workflow
+
+### 1. Prepare the data
+
+```{r data-prep}
+library(BayesSPsurv)
+
+walter <- spduration::add_duration(
+  Walter_2015_JCR, "renewed_war",
+  unitID = "ccode", tID = "year",
+  freq = "year", ongoing = FALSE
+)
+```
+
+### 2. Diagnostic tests for spatial autocorrelation
+
+Before choosing between pooled and spatial models, check whether spatial
+autocorrelation is present. BayesSPsurv includes two diagnostic functions:
+
+```{r diagnostics, fig.width=6, fig.height=4}
+# Moran's I test
+plot_Moran.I(
+  data = walter,
+  var_duration = "duration",
+  var_id = "ccode",
+  var_time = "year",
+  n = 12
+)
+
+# Join Count test
+plot_JoinCount(
+  data = walter,
+  var_cured = "cured",
+  var_id = "ccode",
+  var_time = "year",
+  n = 12
+)
+```
+
+Positive Moran's I values and negative Join Count differences suggest spatial
+clustering, supporting the use of a spatial model.
+
+### 3. Create the spatial weights matrix
+
+For country-level data with Gleditsch-Ward codes, use `spatial_SA()`:
+
+```{r spatial-matrix}
+walter <- spatial_SA(data = walter, var_ccode = "ccode", threshold = 800L)
+
+# walter is now a list:
+# walter[[1]] = data with sp_id column
+# walter[[2]] = spatial weights matrix A
+```
+
+For non-country data (e.g., municipalities), build the matrix manually:
+
+```{r custom-matrix}
+# Example: 4 units, units 1-2 and 3-4 are neighbors
+A <- matrix(0, 4, 4)
+A[1, 2] <- A[2, 1] <- 1
+A[3, 4] <- A[4, 3] <- 1
+```
+
+### 4. Estimate the model
+
+```{r estimate}
+set.seed(123456)
+
+model <- spatialSPsurv(
+  duration  = duration ~ victory + comprehensive + lgdpl + unpko,
+  immune    = atrisk ~ lgdpl,
+  Y0        = "t.0",
+  LY        = "lastyear",
+  S         = "sp_id",
+  data      = walter[[1]],
+  N         = 1500,
+  burn      = 300,
+  thin      = 15,
+  w         = c(1, 1, 1),
+  m         = 10,
+  form      = "weibull",
+  prop.varV = 1e-05,
+  prop.varW = 1e-03,
+  A         = walter[[2]]
+)
+```
+
+**Key arguments:**
+
+- `N`: total MCMC iterations. Use at least 10,000--15,000 for real analyses.
+- `burn`: iterations to discard. Typically 20--30\% of `N`.
+- `thin`: keep every *k*-th draw to reduce autocorrelation.
+- `w`, `m`: slice sampler tuning parameters.
+- `prop.varV`, `prop.varW`: proposal variances for the Metropolis-Hastings
+  steps. Start small (e.g., `1e-05`) and adjust based on acceptance rates.
+
+### 5. Inspect results
+
+```{r results}
+# Full output
+print(model)
+
+# Summary of specific parameter
+summary(model, parameter = "betas")
+
+# Summary of all key parameters (betas, gammas, rho)
+summary(model)
+
+# Trace and density plots (via coda)
+plot(model, parameter = "betas")
+
+# DIC and log-likelihood
+SPstats(model)
+```
+
+### 6. Visualize spatial frailties
+
+For country-level models, map the spatial frailties:
+
+```{r map, fig.width=8, fig.height=5}
+bsps_map(data = model$W, mapTitle = "Survival-stage frailties (W)")
+```
+
+For unit-level boxplots:
+
+```{r boxplot, fig.width=8, fig.height=6}
+library(ggplot2)
+
+w_long <- tidyr::pivot_longer(
+  as.data.frame(model$W),
+  cols = seq_len(ncol(model$W))
+)
+
+ggplot(w_long, aes(x = reorder(factor(name), value, FUN = median), y = value)) +
+  geom_boxplot(fill = "gray") +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "", y = "Frailty (W)")
+```
+
+### 7. Convergence diagnostics with multiple chains
+
+Run multiple chains from different starting values and use the Gelman-Rubin diagnostic:
+
+```{r convergence}
+library(coda)
+
+# Run 4 chains with different initial values
+chains <- lapply(c(0, 1, 10, 50), function(init) {
+  spatialSPsurv(
+    duration  = duration ~ victory + comprehensive + lgdpl + unpko,
+    immune    = atrisk ~ lgdpl,
+    Y0        = "t.0",
+    LY        = "lastyear",
+    S         = "sp_id",
+    data      = walter[[1]],
+    N         = 5000,
+    burn      = 1000,
+    thin      = 10,
+    w         = c(1, 1, 1),
+    m         = 10,
+    form      = "weibull",
+    prop.varV = 1e-05,
+    prop.varW = 1e-03,
+    ini.beta  = init,
+    ini.gamma = init,
+    ini.W     = init,
+    ini.V     = init,
+    A         = walter[[2]]
+  )
+})
+
+# Gelman-Rubin diagnostic for betas
+betas_mcmc <- mcmc.list(lapply(chains, function(x) as.mcmc(x$betas)))
+gelman.diag(betas_mcmc)
+```
+
+Values close to 1.0 indicate convergence. As a rule of thumb, values below 1.1
+are acceptable.
+
+## Alternative application: Democratic survival
+
+BayesSPsurv includes a second dataset, `dem_survival`, with 35 democratic
+episodes across 34 countries (1946--2008). The event of interest is democratic
+breakdown. Consolidated democracies that never broke down form the "immune"
+population.
+
+```{r dem-survival}
+data(dem_survival)
+
+# Spatial weights matrix from G&W country codes
+dem_sp <- spatial_SA(data = dem_survival, var_ccode = "ccode", threshold = 800L)
+
+set.seed(12345)
+
+dem_model <- spatialSPsurv(
+  duration  = duration ~ lgdpl + milper + growth,
+  immune    = atrisk ~ lgdpl + resource,
+  Y0        = "t.0",
+  LY        = "lastyear",
+  S         = "sp_id",
+  data      = dem_sp[[1]],
+  N         = 1500,
+  burn      = 300,
+  thin      = 15,
+  w         = c(1, 1, 1),
+  m         = 10,
+  form      = "weibull",
+  prop.varV = 1e-05,
+  prop.varW = 1e-03,
+  A         = dem_sp[[2]]
+)
+
+summary(dem_model)
+SPstats(dem_model)
+```
+
+This example illustrates that BayesSPsurv is not limited to conflict data. Any
+time-to-event process where some units may be structurally immune and spatial
+clustering is plausible can be modeled with these tools.
+
+## Choosing a model
+
+| Question | If yes | If no |
+|----------|--------|-------|
+| Do you suspect some units are "immune" to the event? | Use a split-population model (any of the three) | Consider a standard survival model |
+| Is there spatial clustering in the data? | Use `spatialSPsurv` | Use `pooledSPsurv` or `exchangeSPsurv` |
+| Do you want unit-specific random effects without spatial structure? | Use `exchangeSPsurv` | Use `pooledSPsurv` |
+
+Compare models using the DIC from `SPstats()`. Lower DIC values indicate better fit.
+
+## References
+
+Bolte, B., Schmidt, N., Bejar, S., Huynh, N., & Mukherjee, B. (2021).
+BayesSPsurv: An R Package to Estimate Bayesian (Spatial) Split-Population
+Survival Models. *The R Journal*, 13(1), 595--613.
+
+Joo, M., Bejar, S., Bolte, B., Huynh, N., & Mukherjee, B. (2020).
+Bayesian Spatial Split-Population Models for the Social Sciences.

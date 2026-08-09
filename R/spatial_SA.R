@@ -1,9 +1,13 @@
 #' @title spatial_SA
-#' @description Generates a spatial weights matrix (A) and sp_id (S). User defines units and adjacencies.
+#' @description Generates a spatial weights matrix (A) and spatial unit ID (sp_id/S) for
+#'     country-level data using Gleditsch-Ward (G&W) country codes and capital-city distances.
+#'     This function only works with G&W country codes. For subnational data (municipalities,
+#'     districts, etc.), construct the spatial weights matrix \code{A} manually.
+#'     See \code{\link{BayesSPsurv-package}} for an example.
 #'
-#' @param data data.frame.
-#' @param var_ccode name of the variable that contains the country codes.
-#' @param threshold distance in kilometers. By default is 800.
+#' @param data data.frame containing the observations.
+#' @param var_ccode name of the variable containing Gleditsch-Ward country codes.
+#' @param threshold distance in kilometers defining spatial adjacency. By default is 800.
 #'
 #' @return list. Contains database with variable sp_id (S) and matrix A.
 #'

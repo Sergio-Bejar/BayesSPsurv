@@ -13,7 +13,7 @@
 #' @param m limit on steps in the slice sampling. A vector of values for beta, gamma, rho.
 #' @param ini.beta initial value for the parameter vector beta.  By default is 0.
 #' @param ini.gamma initial value for the parameter vector gamma. By default is 0.
-#' @param form type of parametric model (Weibull, Exponential, or Log-Logistic).
+#' @param form type of parametric model: "weibull", "exponential", or "loglog" (Log-Logistic). Case-insensitive; "Log-Logistic" is also accepted.
 #'
 #' @return pooledSPsurv returns an object of class \code{"SPsurv"}.
 #'
@@ -80,9 +80,14 @@ pooledSPsurv <- function(duration,
                   m = 10,
                   ini.beta =  0,
                   ini.gamma = 0,
-                  form = c('Weibull', 'exponential', 'loglog'))
+                  form = c('weibull', 'exponential', 'loglog'))
 {
 
+    validate_inputs(duration = duration, immune = immune, Y0 = Y0, LY = LY,
+                    data = data, N = N, burn = burn, thin = thin, w = w,
+                    m = m, form = form)
+    form <- tolower(form)
+    form <- sub("log-logistic", "loglog", form, fixed = TRUE)
     dis <- match.arg(form)
     model <- 'SPsurv'
     r   <- formcall(duration = duration, immune = immune, data = data, Y0 = Y0,
@@ -111,16 +116,24 @@ pooledSPsurv <- function(duration,
 
 #' @title summary.SPsurv
 #' @description Returns a summary of a SPsurv object via \code{\link[coda]{summary.mcmc}}.
+#'     When \code{parameter} is not specified, prints a summary of all key parameters.
 #' @param object an object of class \code{SPsurv}, the output of \code{\link{pooledSPsurv}}.
-#' @param parameter one of Four parameters of the \code{\link{pooledSPsurv}} output. Indicate either "betas," "gammas", "rho" or "delta".
-#' @param ... additional parameter
+#' @param parameter one of four parameters of the \code{\link{pooledSPsurv}} output: "betas", "gammas", "rho", or "delta". If omitted, summarizes betas, gammas, and rho.
+#' @param ... additional parameters passed to \code{\link[coda]{summary.mcmc}}.
 #' @return list. Empirical mean, standard deviation and quantiles for each variable.
 #' @rdname pooledSPsurv
 #' @export
-#'
-#'
 
-summary.SPsurv <- function(object, parameter = character(), ...){
+summary.SPsurv <- function(object, parameter = NULL, ...){
+    if (is.null(parameter)) {
+        cat("Duration equation (betas):\n")
+        print(summary(coda::mcmc(object[["betas"]]), ...)$statistics)
+        cat("\nImmune equation (gammas):\n")
+        print(summary(coda::mcmc(object[["gammas"]]), ...)$statistics)
+        cat("\nRho:\n")
+        print(summary(coda::mcmc(object[["rho"]]), ...)$statistics)
+        return(invisible(NULL))
+    }
     summary(coda::mcmc(object[[parameter]]), ...)
 }
 

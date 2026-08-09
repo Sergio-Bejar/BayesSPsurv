@@ -19,7 +19,7 @@ SPstats = function(object){
     Y0 <- as.matrix(object$spstats$Y0)
     C  <- as.matrix(object$spstats$C)
     form <- object$spstats$form
-    if(length(class(object)) == 2){
+    if(inherits(object, "spatialSPsurv") || inherits(object, "frailtySPsurv")){
 
         data <- as.data.frame(cbind(Y, Y0, C, X, Z))
 

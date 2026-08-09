@@ -1,17 +1,17 @@
 Package: BayesSPsurv
 Type: Package
 Title: Bayesian Spatial Split Population Survival Model
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: c(person(given = "Brandon L.",
                     family = "Bolte",
                     role = c("aut")),
-             person(given = "Nicolas", 
-                    family = "Schmidt", 
-                    role = c("aut", "cre"), 
-                    email = "nschmidt@cienciassociales.edu.uy"), 
+             person(given = "Nicolas",
+                    family = "Schmidt",
+                    role = c("aut")),
              person(given = "Sergio",
                     family = "Bejar",
-                    role = c("aut")),
+                    role = c("aut", "cre"),
+                    email = "sergio.bejar@cide.edu"),
              person(given = "Minnie M.",
                     family = "Joo",
                     role = c("aut")),       
@@ -36,9 +36,9 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.6.0)
-BugReports: https://github.com/Nicolas-Schmidt/BayesSPsurv/issues
-URL: https://nicolas-schmidt.github.io/BayesSPsurv/
-RoxygenNote: 7.1.1
+BugReports: https://github.com/Sergio-Bejar/BayesSPsurv/issues
+URL: https://github.com/Sergio-Bejar/BayesSPsurv
+RoxygenNote: 7.3.2
 LinkingTo: 
     Rcpp,
     RcppArmadillo
@@ -52,8 +52,12 @@ Imports:
 	reshape2, 
 	ggplot2,
 	ape,
-	progress,
-	rworldmap, 
-	countrycode
+	progress
 Suggests:
-    spduration
+    spduration,
+    rworldmap,
+    countrycode,
+    knitr,
+    rmarkdown,
+    tidyr
+VignetteBuilder: knitr

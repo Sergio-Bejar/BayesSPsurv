@@ -16,7 +16,7 @@
 #' @param ini.gamma initial value for the parameter vector gamma. By default is 0.
 #' @param ini.W initial value for the parameter vector W. By default is 0.
 #' @param ini.V initial value for the parameter vector V.  By default is 0.
-#' @param form type of parametric model (Weibull, Exponential, or Log-Logistic).
+#' @param form type of parametric model: "weibull", "exponential", or "loglog" (Log-Logistic). Case-insensitive; "Log-Logistic" is also accepted.
 #' @param prop.varV proposed variance for V in Metropolis-Hastings.
 #' @param prop.varW proposed variance for W in Metropolis-Hastings.
 #' @param id_WV vector of type character that modifies the colnames of W and V in the model’s result. By default is \code{unique(data[,S])}.
@@ -138,12 +138,18 @@ exchangeSPsurv <- function(duration,
                           ini.gamma = 0,
                           ini.W = 0,
                           ini.V= 0,
-                          form = c('Weibull', 'exponential', 'loglog'),
+                          form = c('weibull', 'exponential', 'loglog'),
                           prop.varV,
                           prop.varW,
                           id_WV = unique(data[,S]))
 {
 
+    validate_inputs(duration = duration, immune = immune, Y0 = Y0, LY = LY,
+                    data = data, N = N, burn = burn, thin = thin, w = w,
+                    m = m, form = form, S = S,
+                    prop.varV = prop.varV, prop.varW = prop.varW)
+    form <- tolower(form)
+    form <- sub("log-logistic", "loglog", form, fixed = TRUE)
     dis <- match.arg(form)
     model <- 'frailtySPsurv'
     r   <- formcall(duration = duration, immune = immune, data = data, Y0 = Y0,
@@ -175,17 +181,25 @@ exchangeSPsurv <- function(duration,
 
 
 #' @title summary.frailtySPsurv
-#' @description Returns a summary of a exchangeSPsurv object via \code{\link[coda]{summary.mcmc}}.
+#' @description Returns a summary of a frailtySPsurv object via \code{\link[coda]{summary.mcmc}}.
+#'     When \code{parameter} is not specified, prints a summary of all key parameters.
 #' @param object an object of class \code{frailtySPsurv}, the output of \code{\link{exchangeSPsurv}}.
-#' @param parameter one of five parameters of the \code{\link{spatialSPsurv}} output. Indicate either "betas," "gammas," "rho", "lambda" or "delta".
-#' @param ... additional parameter
+#' @param parameter one of five parameters of the \code{\link{exchangeSPsurv}} output: "betas", "gammas", "rho", "lambda", or "delta". If omitted, summarizes betas, gammas, and rho.
+#' @param ... additional parameters passed to \code{\link[coda]{summary.mcmc}}.
 #' @return list. Empirical mean, standard deviation and quantiles for each variable.
 #' @rdname exchangeSPsurv
 #' @export
-#'
-#'
 
-summary.frailtySPsurv <- function(object, parameter = character(), ...){
+summary.frailtySPsurv <- function(object, parameter = NULL, ...){
+    if (is.null(parameter)) {
+        cat("Duration equation (betas):\n")
+        print(summary(coda::mcmc(object[["betas"]]), ...)$statistics)
+        cat("\nImmune equation (gammas):\n")
+        print(summary(coda::mcmc(object[["gammas"]]), ...)$statistics)
+        cat("\nRho:\n")
+        print(summary(coda::mcmc(object[["rho"]]), ...)$statistics)
+        return(invisible(NULL))
+    }
     summary(coda::mcmc(object[[parameter]]), ...)
 }
 
