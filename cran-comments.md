@@ -20,11 +20,14 @@ There is a new maintainer: Sergio Bejar <sergio.bejar@cide.edu>
 
 ## Test environments
 * local macOS (x86_64-apple-darwin17.0), R 4.2.1
+* win-builder R-devel (R Under development, 2026-09-20 r90574 ucrt)
+* win-builder R-release (R 4.6.1, 2026-06-24 ucrt)
+* R-hub Linux (ubuntu-latest, R-devel)
+* R-hub Windows (windows-latest, R-devel)
 
 ## R CMD check results
 
-0 errors | 0 warnings | 2 notes
+0 errors | 0 warnings | 1 note
 
 * NOTE: New submission. Package was archived on CRAN on 2023-06-14.
-* NOTE: One URL in README.md (https://doi.org/10.1177/0022002714528006) returns
-  HTTP 403. This is a valid DOI; SAGE Journals blocks automated URL checkers.
+  There is a new maintainer.
