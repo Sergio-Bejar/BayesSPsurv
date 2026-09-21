@@ -91,13 +91,13 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Sergio Bejar \email{sergio.bejar@cide.edu}
+\strong{Maintainer}: Nicolas Schmidt \email{nschmidt@cienciassociales.edu.uy}
 
 Authors:
 \itemize{
-  \item Sergio Bejar \email{sergio.bejar@cide.edu}
+  \item Nicolas Schmidt \email{nschmidt@cienciassociales.edu.uy}
   \item Brandon L. Bolte
-  \item Nicolas Schmidt
+  \item Sergio Bejar \email{sergio.bejar@cide.edu}
   \item Minnie M. Joo
   \item Nguyen K. Huynh
   \item Bumba Mukherjee

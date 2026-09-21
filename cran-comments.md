@@ -15,9 +15,6 @@ All issues have now been addressed:
 - Replaced deprecated `@docType package` with `"_PACKAGE"` sentinel.
 - Regenerated all .Rd files with roxygen2 8.1.0.
 
-There is a new maintainer: Sergio Bejar <sergio.bejar@cide.edu>
-(previous maintainer: Nicolas Schmidt <nschmidt@cienciassociales.edu.uy>).
-
 ## Test environments
 * local macOS (x86_64-apple-darwin17.0), R 4.2.1
 * win-builder R-devel (R Under development, 2026-09-20 r90574 ucrt)
@@ -30,4 +27,3 @@ There is a new maintainer: Sergio Bejar <sergio.bejar@cide.edu>
 0 errors | 0 warnings | 1 note
 
 * NOTE: New submission. Package was archived on CRAN on 2023-06-14.
-  There is a new maintainer.
