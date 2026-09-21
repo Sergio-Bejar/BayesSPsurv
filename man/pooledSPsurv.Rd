@@ -20,10 +20,10 @@ pooledSPsurv(
   m = 10,
   ini.beta = 0,
   ini.gamma = 0,
-  form = c("Weibull", "exponential", "loglog")
+  form = c("weibull", "exponential", "loglog")
 )
 
-\method{summary}{SPsurv}(object, parameter = character(), ...)
+\method{summary}{SPsurv}(object, parameter = NULL, ...)
 
 \method{print}{SPsurv}(x, ...)
 
@@ -54,7 +54,7 @@ pooledSPsurv(
 
 \item{ini.gamma}{initial value for the parameter vector gamma. By default is 0.}
 
-\item{form}{type of parametric model (Weibull, Exponential, or Log-Logistic).}
+\item{form}{type of parametric model: "weibull", "exponential", or "loglog" (Log-Logistic). Case-insensitive; "Log-Logistic" is also accepted.}
 
 \item{object}{an object of class \code{SPsurv}, the output of \code{\link{pooledSPsurv}}.}
 
@@ -90,6 +90,7 @@ list. Empirical mean, standard deviation and quantiles for each variable.
 Markov Chain Monte Carlo (MCMC) to run Bayesian split population survival model with no frailties.
 
 Returns a summary of a SPsurv object via \code{\link[coda]{summary.mcmc}}.
+    When \code{parameter} is not specified, prints a summary of all key parameters.
 
 Print method for a \code{\link{pooledSPsurv}} x.
 

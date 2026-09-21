@@ -38,7 +38,6 @@ Depends:
     R (>= 3.6.0)
 BugReports: https://github.com/Sergio-Bejar/BayesSPsurv/issues
 URL: https://github.com/Sergio-Bejar/BayesSPsurv
-RoxygenNote: 7.3.2
 LinkingTo: 
     Rcpp,
     RcppArmadillo
@@ -61,3 +60,4 @@ Suggests:
     rmarkdown,
     tidyr
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.1.0

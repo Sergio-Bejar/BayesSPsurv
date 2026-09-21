@@ -19,20 +19,24 @@ export(spatialSPsurv)
 export(spatial_SA)
 import(grDevices)
 import(graphics)
-importFrom(FastGP,rcpp_log_dmvnorm)
-importFrom(FastGP,rcpp_rmvnorm)
+importFrom(FastGP,
+  rcpp_log_dmvnorm,
+  rcpp_rmvnorm
+)
 importFrom(MCMCpack,riwish)
 importFrom(Rcpp,sourceCpp)
 importFrom(coda,mcmc)
 importFrom(dplyr,distinct)
 importFrom(reshape2,acast)
-importFrom(stats,as.formula)
-importFrom(stats,dgamma)
-importFrom(stats,dnorm)
-importFrom(stats,model.frame)
-importFrom(stats,model.matrix)
-importFrom(stats,model.response)
-importFrom(stats,na.omit)
-importFrom(stats,rgamma)
-importFrom(stats,runif)
+importFrom(stats,
+  as.formula,
+  dgamma,
+  dnorm,
+  model.frame,
+  model.matrix,
+  model.response,
+  na.omit,
+  rgamma,
+  runif
+)
 useDynLib(BayesSPsurv)

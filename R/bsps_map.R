@@ -48,7 +48,7 @@ bsps_map <- function(data, mapTitle = "columnName"){
     }
 
     sp <- data.frame(ccode = colnames(data),
-                     ISO3 = countrycode::countrycode(colnames(data) ,'gwn','iso3c'),
+                     ISO3 = countrycode::countrycode(as.numeric(colnames(data)) ,'gwn','iso3c'),
                      sp = matrix(apply(data, 2, mean), ncol = 1, nrow = ncol(data)))
     map <- rworldmap::joinCountryData2Map(sp, joinCode = "ISO3", nameJoinColumn = "ISO3")
     rworldmap::mapCountryData(mapToPlot = map,

@@ -23,13 +23,13 @@ exchangeSPsurv(
   ini.gamma = 0,
   ini.W = 0,
   ini.V = 0,
-  form = c("Weibull", "exponential", "loglog"),
+  form = c("weibull", "exponential", "loglog"),
   prop.varV,
   prop.varW,
   id_WV = unique(data[, S])
 )
 
-\method{summary}{frailtySPsurv}(object, parameter = character(), ...)
+\method{summary}{frailtySPsurv}(object, parameter = NULL, ...)
 
 \method{print}{frailtySPsurv}(x, ...)
 
@@ -66,7 +66,7 @@ exchangeSPsurv(
 
 \item{ini.V}{initial value for the parameter vector V.  By default is 0.}
 
-\item{form}{type of parametric model (Weibull, Exponential, or Log-Logistic).}
+\item{form}{type of parametric model: "weibull", "exponential", or "loglog" (Log-Logistic). Case-insensitive; "Log-Logistic" is also accepted.}
 
 \item{prop.varV}{proposed variance for V in Metropolis-Hastings.}
 
@@ -113,7 +113,8 @@ list. Empirical mean, standard deviation and quantiles for each variable.
 \description{
 Markov Chain Monte Carlo (MCMC) to run Bayesian split population survival model with exchangeable frailties.
 
-Returns a summary of a exchangeSPsurv object via \code{\link[coda]{summary.mcmc}}.
+Returns a summary of a frailtySPsurv object via \code{\link[coda]{summary.mcmc}}.
+    When \code{parameter} is not specified, prints a summary of all key parameters.
 
 Print method for a \code{\link{exchangeSPsurv}} x.
 

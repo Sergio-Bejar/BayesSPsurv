@@ -68,6 +68,4 @@
 #' # etc.
 #' }
 #'
-#' @docType package
-#' @name BayesSPsurv-package
-NULL
+"_PACKAGE"

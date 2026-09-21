@@ -100,7 +100,7 @@ remotes::install_github("Nicolas-Schmidt/BayesSPsurv")
 
 We illustrate the functionality of **BayesSPsurv** using data from
 [Walter
-(2015)](https://journals.sagepub.com/doi/abs/10.1177/0022002714528006)’s
+(2015)](https://doi.org/10.1177/0022002714528006)’s
 study on post-civil war peace duration. The data is included and
 described in the manual’s package.
 
