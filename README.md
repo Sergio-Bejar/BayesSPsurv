@@ -460,69 +460,12 @@ coda::gelman.diag(betas)
 #> 1.07
 coda::gelman.diag(gammas)
 #> Potential scale reduction factors:
-#>
+#> 
 #>             Point est. Upper C.I.
 #> (Intercept)       1.25       1.74
 #> lgdpl             1.12       1.39
-#>
+#> 
 #> Multivariate psrf
-#>
+#> 
 #> 1.23
 ```
-
-## stanSPsurv: next-generation Stan backend
-
-[**stanSPsurv**](https://github.com/Sergio-Bejar/stanSPsurv) reimplements
-the split-population survival framework from BayesSPsurv using
-[Stan](https://mc-stan.org) via `cmdstanr`. It preserves the same three
-model families (pooled, exchangeable, spatial) and provides a simpler
-formula-based interface built around `survival::Surv()`.
-
-### Why stanSPsurv?
-
-| | BayesSPsurv | stanSPsurv |
-|---|---|---|
-| **Sampler** | Slice sampling + Metropolis-Hastings (C++) | Hamiltonian Monte Carlo (Stan) |
-| **Speed** | ~150–240 sec per model | ~3–6 sec (pooled/exchangeable) |
-| **Efficiency** | 1–15 ESS/sec | 300–580 ESS/sec |
-| **Baselines** | Weibull, exponential, log-logistic | Weibull, log-logistic |
-| **Shape parameter** | Constrained to < 1 (decreasing hazards only) | Unconstrained (any hazard shape) |
-| **Spatial prior** | Unscaled CAR | Scaled proper-CAR (BYM2) with disconnected components |
-| **Diagnostics** | DIC, Gelman-Rubin | Rhat, ESS, divergences, LOO-CV via `log_lik` |
-| **Plotting** | Moran's I, Join Count, `bsps_map` | Coefficient plots, survival curves, susceptibility, frailty caterpillars, choropleth |
-| **Interface** | Separate formula + column-name arguments | `Surv()` formula + split formula |
-| **Counting process** | Via `Y0` / `LY` columns | Via `Surv(t0, time, event)` + `spell` |
-
-### Quick example
-
-```r
-library(stanSPsurv)
-
-data(conflict_spells)
-
-fit <- stan_pooled_spsurv(
-  Surv(time, event) ~ victory + gdp + peacekeeping,
-  split_formula = ~ gdp,
-  data = conflict_spells,
-  form = "weibull",
-  chains = 4, parallel_chains = 4
-)
-
-summary(fit)
-plot(fit)
-```
-
-### Installation
-
-```r
-install.packages("cmdstanr",
-                 repos = c("https://stan-dev.r-universe.dev",
-                           "https://cloud.r-project.org"))
-cmdstanr::install_cmdstan()
-remotes::install_github("Sergio-Bejar/stanSPsurv")
-```
-
-### Reference
-
-Béjar S, Mukherjee B (2026). *stanSPsurv: Bayesian Split-Population
-Survival Models with Stan*. R package version 0.1.0.
