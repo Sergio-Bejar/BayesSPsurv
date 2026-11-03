@@ -472,38 +472,13 @@ coda::gelman.diag(gammas)
 
 ## stanSPsurv: next-generation Stan backend
 
-[**stanSPsurv**](https://github.com/Sergio-Bejar/stanSPsurv) builds on
-the split-population survival framework introduced in BayesSPsurv,
-replacing the hand-coded MCMC sampler (slice sampling and
-Metropolis-Hastings in C++) with
-[Stan](https://mc-stan.org)'s Hamiltonian Monte Carlo (HMC) via
-`cmdstanr`.
+[**stanSPsurv**](https://github.com/Sergio-Bejar/stanSPsurv) reimplements
+the split-population survival framework from BayesSPsurv using
+[Stan](https://mc-stan.org) via `cmdstanr`. It preserves the same three
+model families (pooled, exchangeable, spatial) and provides a simpler
+formula-based interface built around `survival::Surv()`.
 
-Like BayesSPsurv, stanSPsurv fits Bayesian split-population (cure)
-survival models that jointly estimate (1) which units are susceptible to
-the event of interest and (2) how long susceptible units survive before
-the event occurs. It retains the same three model families---pooled,
-exchangeable-frailty, and spatial CAR---while offering several practical
-improvements.
-
-The Stan backend brings two key advantages. First, HMC explores the
-posterior geometry more efficiently than component-wise slice sampling,
-producing far less autocorrelated draws per unit of compute time. In
-simulation studies, stanSPsurv delivers 40 to 1,000 times more
-effective samples per second than BayesSPsurv on the same data. Second,
-writing the likelihood in Stan's modeling language makes it
-straightforward to extend the model---adding new baseline hazards,
-alternative priors, or hierarchical structures requires modifying a few
-lines of Stan code rather than hundreds of lines of C++.
-
-stanSPsurv also introduces a simplified interface built around
-`survival::Surv()`, built-in plotting functions for coefficient
-estimates, survival curves, susceptibility profiles, frailty caterpillar
-plots, and choropleth maps, and an improved spatial prior (scaled
-proper-CAR / BYM2) that handles disconnected adjacency graphs and
-isolated spatial units.
-
-### Comparison
+### Why stanSPsurv?
 
 | | BayesSPsurv | stanSPsurv |
 |---|---|---|
